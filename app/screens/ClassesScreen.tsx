@@ -1,9 +1,11 @@
+// screens/ClassesScreen.tsx
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { loadData, saveData } from '../app/storage';
+import { loadData, saveData } from '../storage';
 
-export default function ClassesScreen({ navigation }) {
-  const [classes, setClasses] = useState([]);
+const ClassesScreen: React.FC<any> = ({ navigation }) => {
+  const [classes, setClasses] = useState<any[]>([]);
 
   const load = async () => {
     const data = await loadData();
@@ -15,7 +17,7 @@ export default function ClassesScreen({ navigation }) {
     return unsub;
   }, [navigation]);
 
-  const deleteClass = (cls) => {
+  const deleteClass = (cls: any) => {
     Alert.alert(
       'Delete Class',
       `Delete class "${cls.name}"? This will also delete its students and attendance.`,
@@ -26,22 +28,25 @@ export default function ClassesScreen({ navigation }) {
           style: 'destructive',
           onPress: async () => {
             const data = await loadData();
-            data.classes = data.classes.filter(c => c.id !== cls.id);
-            data.students = data.students.filter(s => s.classId !== cls.id);
-            data.attendance = data.attendance.filter(a => a.classId !== cls.id);
+            data.classes = data.classes.filter((c: any) => c.id !== cls.id);
+            data.students = data.students.filter((s: any) => s.classId !== cls.id);
+            data.attendance = data.attendance.filter((a: any) => a.classId !== cls.id);
             await saveData(data);
             load();
-          }
-        }
+          },
+        },
       ]
     );
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <TouchableOpacity
       className="mb-3 rounded-xl border border-slate-200 bg-white p-4 flex-row justify-between items-center"
       onPress={() =>
-        navigation.navigate('Students', { classId: item.id, className: item.name })
+        navigation.navigate('Students', {
+          classId: item.id,          // ✅ ALWAYS send classId
+          className: item.name,      // optional
+        })
       }
     >
       <View className="flex-1">
@@ -58,7 +63,7 @@ export default function ClassesScreen({ navigation }) {
             navigation.navigate('ClassForm', {
               classId: item.id,
               name: item.name,
-              section: item.section
+              section: item.section,
             })
           }
         >
@@ -81,11 +86,7 @@ export default function ClassesScreen({ navigation }) {
           No classes yet. Tap + to add one.
         </Text>
       ) : (
-        <FlatList
-          data={classes}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-        />
+        <FlatList data={classes} keyExtractor={(item) => item.id} renderItem={renderItem} />
       )}
 
       <TouchableOpacity
@@ -96,4 +97,6 @@ export default function ClassesScreen({ navigation }) {
       </TouchableOpacity>
     </View>
   );
-}
+};
+
+export default ClassesScreen;

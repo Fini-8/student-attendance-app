@@ -1,33 +1,51 @@
+// screens/StudentFormScreen.tsx
+
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
-import { loadData, saveData } from '../app/storage';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { loadData, saveData } from '../storage';
 
-export default function StudentFormScreen({ route, navigation }) {
-  const { classId } = route.params;
-  const editing = !!route.params?.studentId;
+// --- Navigation params for this screen ---
+type RootStackParamList = {
+  StudentForm: {
+    classId: string;
+    studentId?: string;
+    name?: string;
+    rollNo?: string;
+  };
+};
 
-  const [name, setName] = useState(route.params?.name || '');
-  const [rollNo, setRollNo] = useState(route.params?.rollNo || '');
+type Props = NativeStackScreenProps<RootStackParamList, 'StudentForm'>;
+
+const StudentFormScreen: React.FC<Props> = ({ route, navigation }) => {
+  const { classId, studentId, name: initialName, rollNo: initialRoll } = route.params;
+
+  const editing = !!studentId;
+
+  const [name, setName] = useState(initialName || '');
+  const [rollNo, setRollNo] = useState(initialRoll || '');
 
   useEffect(() => {
     navigation.setOptions({ title: editing ? 'Edit Student' : 'Add Student' });
   }, [editing, navigation]);
 
-  const onSave = async () => {
+  const onSave = async (): Promise<void> => {
     if (!name.trim()) return;
 
     const data = await loadData();
 
     if (editing) {
-      data.students = data.students.map(s =>
-        s.id === route.params.studentId ? { ...s, name, rollNo } : s
+      // update existing student
+      data.students = data.students.map((s) =>
+        s.id === studentId ? { ...s, name, rollNo } : s
       );
     } else {
+      // create new student
       data.students.push({
         id: 'stu_' + Date.now(),
+        classId,
         name,
         rollNo,
-        classId
       });
     }
 
@@ -45,20 +63,23 @@ export default function StudentFormScreen({ route, navigation }) {
           className="bg-white rounded-xl px-4 py-3 border border-slate-200"
         />
         <TextInput
-          placeholder="Roll Number"
+          placeholder="Roll No (optional)"
           value={rollNo}
           onChangeText={setRollNo}
           className="bg-white rounded-xl px-4 py-3 border border-slate-200"
         />
+
         <TouchableOpacity
-          className="mt-2 rounded-xl bg-blue-600 py-3 items-center"
+          className="mt-2 items-center rounded-xl bg-blue-600 py-3"
           onPress={onSave}
         >
-          <Text className="text-white font-semibold">
+          <Text className="font-semibold text-white">
             {editing ? 'Save Changes' : 'Add Student'}
           </Text>
         </TouchableOpacity>
       </View>
     </View>
   );
-}
+};
+
+export default StudentFormScreen;

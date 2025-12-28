@@ -1,8 +1,25 @@
+// screens/ClassFormScreen.tsx
+
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, TouchableOpacity, Text } from 'react-native';
-import { loadData, saveData } from '../app/storage';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { loadData, saveData } from '../storage';
 
-export default function ClassFormScreen({ route, navigation }) {
+/* ---------- Navigation Params ---------- */
+
+type RootStackParamList = {
+  ClassForm: {
+    classId?: string;
+    name?: string;
+    section?: string;
+  };
+};
+
+type Props = NativeStackScreenProps<RootStackParamList, 'ClassForm'>;
+
+/* ---------- Component ---------- */
+
+const ClassFormScreen: React.FC<Props> = ({ route, navigation }) => {
   const editing = !!route?.params?.classId;
   const [name, setName] = useState(route?.params?.name || '');
   const [section, setSection] = useState(route?.params?.section || '');
@@ -16,15 +33,15 @@ export default function ClassFormScreen({ route, navigation }) {
 
     const data = await loadData();
 
-    if (editing) {
-      data.classes = data.classes.map(c =>
-        c.id === route.params.classId ? { ...c, name, section } : c
+    if (editing && route.params?.classId) {
+      data.classes = data.classes.map((c) =>
+        c.id === route.params!.classId ? { ...c, name, section } : c
       );
     } else {
       data.classes.push({
         id: 'class_' + Date.now(),
         name,
-        section
+        section,
       });
     }
 
@@ -58,4 +75,6 @@ export default function ClassFormScreen({ route, navigation }) {
       </View>
     </View>
   );
-}
+};
+
+export default ClassFormScreen;
