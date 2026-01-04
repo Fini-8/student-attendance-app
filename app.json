@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "student-attendance-app",
-    "slug": "student-attendance-app",
+    "name": "Attend Pro",
+    "slug": "attendance-pro",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
